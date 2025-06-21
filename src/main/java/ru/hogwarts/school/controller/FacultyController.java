@@ -32,16 +32,17 @@ public class FacultyController {
 
     /**
      * когда объект не найден то ResponseEntity.notFound().build(); выдает код 404
+     *
      * @param id
      * @return
      */
     @GetMapping("{id}")
     public ResponseEntity<Faculty> getFaculty(@PathVariable long id) {
-        Faculty foundFaculty = facultyService.getFaculties(id);
+        Faculty foundFaculty = facultyService.findFaculties(id);
         if (foundFaculty == null) {
-           return ResponseEntity.notFound().build();
+            return ResponseEntity.notFound().build();
         }
-       return ResponseEntity.ok(foundFaculty);
+        return ResponseEntity.ok(foundFaculty);
     }
 
     @GetMapping("/all")
@@ -51,6 +52,7 @@ public class FacultyController {
 
     /**
      * когда ошибка вызвана неправильным запросом ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); выдает код 400
+     *
      * @param faculty
      * @return
      */
@@ -64,13 +66,14 @@ public class FacultyController {
     }
 
     @DeleteMapping("{id}")
-    public Faculty removeFaculty(@PathVariable long id) {
-        return facultyService.removeFaculty(id);
+    public ResponseEntity<?> removeFaculty(@PathVariable long id) {
+        facultyService.removeFaculty(id);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("filter")
     public ResponseEntity<Collection<Faculty>> filteredFaculty(@RequestParam(required = false) String color) {
-        if (color !=  null && !color.isBlank()) {
+        if (color != null && !color.isBlank()) {
             return ResponseEntity.ok(facultyService.filteredFacultyByColor(color));
         }
         return ResponseEntity.ok(Collections.emptyList());
