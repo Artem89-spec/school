@@ -1,10 +1,10 @@
 package ru.hogwarts.school.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.hogwarts.school.model.Faculty;
+import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.service.FacultyService;
 
 import java.util.Collection;
@@ -15,7 +15,6 @@ import java.util.Collections;
 public class FacultyController {
     private final FacultyService facultyService;
 
-    @Autowired
     public FacultyController(FacultyService facultyService) {
         this.facultyService = facultyService;
     }
@@ -72,10 +71,24 @@ public class FacultyController {
     }
 
     @GetMapping("filter")
-    public ResponseEntity<Collection<Faculty>> filteredFaculty(@RequestParam(required = false) String color) {
+    public ResponseEntity<Collection<Faculty>> filteredFaculty(
+            @RequestParam(required = false) String color,
+            @RequestParam(required = false) String facultyName) {
         if (color != null && !color.isBlank()) {
             return ResponseEntity.ok(facultyService.filteredFacultyByColor(color));
         }
+        if (facultyName != null && facultyName.isBlank()) {
+            return ResponseEntity.ok(facultyService.filteredFacultyByName(facultyName));
+        }
         return ResponseEntity.ok(Collections.emptyList());
+    }
+
+    @GetMapping("{facultyId}/students")
+    public ResponseEntity<Collection<Student>> findStudentsByFaculty(@PathVariable Long facultyId) {
+        Faculty faculty = facultyService.findFaculties(facultyId);
+        if (faculty != null) {
+           return ResponseEntity.ok(faculty.getStudents());
+        }
+        return ResponseEntity.notFound().build();
     }
 }

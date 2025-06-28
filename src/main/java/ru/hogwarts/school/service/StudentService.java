@@ -46,4 +46,8 @@ public class StudentService {
     public Collection<Student> filteredStudentByAge(int age) {
       return studentRepository.findByAge(age);
     }
+
+    public Collection<Student> findByAgeBetween(int startAge, int endAge) {
+        return studentRepository.findByAgeBetween(startAge, endAge);
+    }
 }
