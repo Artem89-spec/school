@@ -1,9 +1,8 @@
 package ru.hogwarts.school.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.service.StudentService;
 
@@ -15,7 +14,6 @@ import java.util.Collections;
 public class StudentController {
     private final StudentService studentService;
 
-    @Autowired
     public StudentController(StudentService studentService) {
         this.studentService = studentService;
     }
@@ -31,12 +29,8 @@ public class StudentController {
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<Student> getStudent(@PathVariable long id) {
-        Student foundStudent = studentService.findStudent(id);
-        if (foundStudent == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(foundStudent);
+    public Student getStudent(@PathVariable long id) {
+        return  studentService.findStudent(id);
     }
 
     @GetMapping("/all")
@@ -45,25 +39,32 @@ public class StudentController {
     }
 
     @PutMapping
-    public ResponseEntity<Student> editStudent(@RequestBody Student student) {
-        Student newStudent = studentService.editStudent(student);
-        if (newStudent == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-        return ResponseEntity.ok(newStudent);
+    public Student editStudent(@RequestBody Student student) {
+        return studentService.editStudent(student);
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<?> removeStudent(@PathVariable long id) {
+    public void removeStudent(@PathVariable long id) {
         studentService.removeStudent(id);
-        return ResponseEntity.ok().build();
     }
 
     @GetMapping("filter")
-    public ResponseEntity<Collection<Student>> filteredStudents(@RequestParam(required = false) Integer age) {
-        if (age > 0) {
+    public ResponseEntity<Collection<Student>> filteredStudents(
+            @RequestParam(required = false) Integer age,
+            @RequestParam(required = false) Integer startAge,
+            @RequestParam (required = false) Integer endAge) {
+        if (age != null && age > 0) {
             return ResponseEntity.ok(studentService.filteredStudentByAge(age));
         }
+        if (startAge !=  null && endAge != null && startAge > 0 && endAge > 0 && endAge >= startAge) {
+            return ResponseEntity.ok(studentService.findByAgeBetween(startAge, endAge));
+        }
         return ResponseEntity.ok(Collections.emptyList());
+    }
+
+    @GetMapping("{studentId}/faculty")
+    public ResponseEntity<Faculty> findFacultyByStudent(@PathVariable Long studentId) {
+        Student student = studentService.findStudent(studentId);
+        return ResponseEntity.ok(student.getFaculty());
     }
 }

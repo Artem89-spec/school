@@ -2,13 +2,14 @@ package ru.hogwarts.school.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.hogwarts.school.exception.ObjectNotFoundException;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.StudentRepository;
 
 import java.util.*;
 
 @Service
-public class StudentService {
+public class StudentService implements ExceptionService {
     private final StudentRepository studentRepository;
 
     @Autowired
@@ -28,14 +29,18 @@ public class StudentService {
     }
 
     public Student findStudent(long id) {
-        return studentRepository.findById(id).orElse(null);
+        return getEntityOrThrow(studentRepository.findById(id), id, Student.class);
     }
 
     public Student editStudent(Student student) {
-        return studentRepository.save(student);
+        Student savedStudent = studentRepository.save(student);
+        return checkNotNull(savedStudent, student.getId(), Student.class);
     }
 
     public void removeStudent(long id) {
+        if (!studentRepository.existsById(id)) {
+            throw new ObjectNotFoundException(id, Student.class);
+        }
         studentRepository.deleteById(id);
     }
 
@@ -45,5 +50,9 @@ public class StudentService {
 
     public Collection<Student> filteredStudentByAge(int age) {
       return studentRepository.findByAge(age);
+    }
+
+    public Collection<Student> findByAgeBetween(int startAge, int endAge) {
+        return studentRepository.findByAgeBetween(startAge, endAge);
     }
 }
