@@ -2,13 +2,14 @@ package ru.hogwarts.school.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.hogwarts.school.exception.ObjectNotFoundException;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.repository.FacultyRepository;
 
 import java.util.*;
 
 @Service
-public class FacultyService {
+public class FacultyService implements ExceptionService {
     private final FacultyRepository facultyRepository;
 
     @Autowired
@@ -28,14 +29,17 @@ public class FacultyService {
     }
 
     public Faculty findFaculties(long id) {
-        return facultyRepository.findById(id).orElse(null);
+        return getEntityOrThrow(facultyRepository.findById(id), id, Faculty.class);
     }
 
     public Faculty editFaculty(Faculty faculty) {
-        return facultyRepository.save(faculty);
+        return checkNotNull(facultyRepository.save(faculty), faculty, Faculty.class);
     }
 
     public void removeFaculty(long id) {
+        if (!facultyRepository.existsById(id)) {
+            throw new ObjectNotFoundException(id, Faculty.class);
+        }
         facultyRepository.deleteById(id);
     }
 

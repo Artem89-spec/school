@@ -1,94 +1,81 @@
-package ru.hogwarts.school.controller;
+    package ru.hogwarts.school.controller;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import ru.hogwarts.school.model.Faculty;
-import ru.hogwarts.school.model.Student;
-import ru.hogwarts.school.service.FacultyService;
+    import org.springframework.http.ResponseEntity;
+    import org.springframework.web.bind.annotation.*;
+    import ru.hogwarts.school.model.Faculty;
+    import ru.hogwarts.school.model.Student;
+    import ru.hogwarts.school.service.FacultyService;
 
-import java.util.Collection;
-import java.util.Collections;
+    import java.util.Collection;
+    import java.util.Collections;
 
-@RestController
-@RequestMapping("faculty")
-public class FacultyController {
-    private final FacultyService facultyService;
+    @RestController
+    @RequestMapping("faculty")
+    public class FacultyController {
+        private final FacultyService facultyService;
 
-    public FacultyController(FacultyService facultyService) {
-        this.facultyService = facultyService;
-    }
-
-    @PostMapping
-    public Faculty createFaculty(@RequestBody Faculty faculty) {
-        return facultyService.createFaculty(faculty);
-    }
-
-    @PostMapping("/params")
-    public Faculty createFacultyWithParameters(@RequestParam String name, @RequestParam String color) {
-        return facultyService.createFacultyWithParameters(name, color);
-    }
-
-    /**
-     * когда объект не найден то ResponseEntity.notFound().build(); выдает код 404
-     *
-     * @param id
-     * @return
-     */
-    @GetMapping("{id}")
-    public ResponseEntity<Faculty> getFaculty(@PathVariable long id) {
-        Faculty foundFaculty = facultyService.findFaculties(id);
-        if (foundFaculty == null) {
-            return ResponseEntity.notFound().build();
+        public FacultyController(FacultyService facultyService) {
+            this.facultyService = facultyService;
         }
-        return ResponseEntity.ok(foundFaculty);
-    }
 
-    @GetMapping("/all")
-    public Collection<Faculty> getAllFaculties() {
-        return facultyService.getAllFaculties();
-    }
-
-    /**
-     * когда ошибка вызвана неправильным запросом ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); выдает код 400
-     *
-     * @param faculty
-     * @return
-     */
-    @PutMapping
-    public ResponseEntity<Faculty> editFaculty(@RequestBody Faculty faculty) {
-        Faculty newFaculty = facultyService.editFaculty(faculty);
-        if (newFaculty == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        @PostMapping
+        public Faculty createFaculty(@RequestBody Faculty faculty) {
+            return facultyService.createFaculty(faculty);
         }
-        return ResponseEntity.ok(newFaculty);
-    }
 
-    @DeleteMapping("{id}")
-    public ResponseEntity<?> removeFaculty(@PathVariable long id) {
-        facultyService.removeFaculty(id);
-        return ResponseEntity.ok().build();
-    }
+        @PostMapping("/params")
+        public Faculty createFacultyWithParameters(@RequestParam String name, @RequestParam String color) {
+            return facultyService.createFacultyWithParameters(name, color);
+        }
 
-    @GetMapping("filter")
-    public ResponseEntity<Collection<Faculty>> filteredFaculty(
-            @RequestParam(required = false) String color,
-            @RequestParam(required = false) String facultyName) {
-        if (color != null && !color.isBlank()) {
-            return ResponseEntity.ok(facultyService.filteredFacultyByColor(color));
+        /**
+         * когда объект не найден то ResponseEntity.notFound().build(); выдает код 404
+         *
+         * @param id
+         * @return
+         */
+        @GetMapping("{id}")
+        public Faculty getFaculty(@PathVariable long id) {
+            return facultyService.findFaculties(id);
         }
-        if (facultyName != null && facultyName.isBlank()) {
-            return ResponseEntity.ok(facultyService.filteredFacultyByName(facultyName));
-        }
-        return ResponseEntity.ok(Collections.emptyList());
-    }
 
-    @GetMapping("{facultyId}/students")
-    public ResponseEntity<Collection<Student>> findStudentsByFaculty(@PathVariable Long facultyId) {
-        Faculty faculty = facultyService.findFaculties(facultyId);
-        if (faculty != null) {
-           return ResponseEntity.ok(faculty.getStudents());
+        @GetMapping("/all")
+        public Collection<Faculty> getAllFaculties() {
+            return facultyService.getAllFaculties();
         }
-        return ResponseEntity.notFound().build();
+
+        /**
+         * когда ошибка вызвана неправильным запросом ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); выдает код 400
+         *
+         * @param faculty
+         * @return
+         */
+        @PutMapping
+        public Faculty editFaculty(@RequestBody Faculty faculty) {
+            return facultyService.editFaculty(faculty);
+        }
+
+        @DeleteMapping("{id}")
+        public void removeFaculty(@PathVariable long id) {
+            facultyService.removeFaculty(id);
+        }
+
+        @GetMapping("filter")
+        public ResponseEntity<Collection<Faculty>> filteredFaculty(
+                @RequestParam(required = false) String color,
+                @RequestParam(required = false) String facultyName) {
+            if (color != null && !color.isBlank()) {
+                return ResponseEntity.ok(facultyService.filteredFacultyByColor(color));
+            }
+            if (facultyName != null && !facultyName.isBlank()) {
+                return ResponseEntity.ok(facultyService.filteredFacultyByName(facultyName));
+            }
+            return ResponseEntity.ok(Collections.emptyList());
+        }
+
+        @GetMapping("{facultyId}/students")
+        public ResponseEntity<Collection<Student>> findStudentsByFaculty(@PathVariable Long facultyId) {
+            Faculty faculty = facultyService.findFaculties(facultyId);
+            return ResponseEntity.ok(faculty.getStudents());
+        }
     }
-}

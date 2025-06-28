@@ -1,6 +1,5 @@
 package ru.hogwarts.school.controller;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.hogwarts.school.model.Faculty;
@@ -9,7 +8,6 @@ import ru.hogwarts.school.service.StudentService;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("student")
@@ -31,12 +29,8 @@ public class StudentController {
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<Student> getStudent(@PathVariable long id) {
-        Student foundStudent = studentService.findStudent(id);
-        if (foundStudent == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(foundStudent);
+    public Student getStudent(@PathVariable long id) {
+        return  studentService.findStudent(id);
     }
 
     @GetMapping("/all")
@@ -45,18 +39,13 @@ public class StudentController {
     }
 
     @PutMapping
-    public ResponseEntity<Student> editStudent(@RequestBody Student student) {
-        Student newStudent = studentService.editStudent(student);
-        if (newStudent == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-        return ResponseEntity.ok(newStudent);
+    public Student editStudent(@RequestBody Student student) {
+        return studentService.editStudent(student);
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<?> removeStudent(@PathVariable long id) {
+    public void removeStudent(@PathVariable long id) {
         studentService.removeStudent(id);
-        return ResponseEntity.ok().build();
     }
 
     @GetMapping("filter")
@@ -76,9 +65,6 @@ public class StudentController {
     @GetMapping("{studentId}/faculty")
     public ResponseEntity<Faculty> findFacultyByStudent(@PathVariable Long studentId) {
         Student student = studentService.findStudent(studentId);
-        if (student != null) {
-            return ResponseEntity.ok(student.getFaculty());
-        }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(student.getFaculty());
     }
 }
