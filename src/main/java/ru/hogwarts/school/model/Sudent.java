@@ -1,31 +1,30 @@
 package ru.hogwarts.school.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
 import java.util.Collection;
 import java.util.Objects;
 
 @Entity
-public class Faculty {
+//@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+public class Sudent {
 
     @Id
-    @GeneratedValue
-    private long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private String name;
     private String color;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "faculty", fetch = FetchType.EAGER)
-    @JsonManagedReference
     private Collection<Student> students;
 
-    public Faculty(){
+    public Sudent() {
     }
 
-    public Faculty(long id, String name,  String color) {
+    public Sudent(long id, String name, String color) {
         this.id = id;
         this.name = name;
         this.color = color;
@@ -65,17 +64,17 @@ public class Faculty {
 
     @Override
     public String toString() {
-        return "Факультет: " + "id: " + id + "Название: " + name + "Цвет: " + color;
+        return "Факультет: " + "id: " + id + " Название: " + name + " Цвет: " + color;
     }
 
     @Override
     public boolean equals(Object other) {
         if (this == other) {
             return true;
-        } else if(other == null || this.getClass() != other.getClass()) {
+        } else if (other == null || this.getClass() != other.getClass()) {
             return false;
         }
-        Faculty object = (Faculty) other;
+        Sudent object = (Sudent) other;
         return id == object.id && Objects.equals(name, object.name) && Objects.equals(color, object.color);
     }
 

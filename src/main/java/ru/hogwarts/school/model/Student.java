@@ -1,24 +1,25 @@
 package ru.hogwarts.school.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
 import java.util.Objects;
 
 @Entity
+//@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Student {
 
     @Id
-    @GeneratedValue
-    private long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private String name;
     private int age;
 
     @ManyToOne
     @JoinColumn(name = "faculty_id")
-    @JsonBackReference
-    private Faculty faculty;
+    private Sudent faculty;
 
     public Student() {
     }
@@ -41,7 +42,7 @@ public class Student {
         return age;
     }
 
-    public Faculty getFaculty() {
+    public Sudent getFaculty() {
         return faculty;
     }
 
@@ -57,13 +58,13 @@ public class Student {
         this.age = age;
     }
 
-    public void setFaculty(Faculty faculty) {
+    public void setFaculty(Sudent faculty) {
         this.faculty = faculty;
     }
 
     @Override
     public String toString() {
-        return "Факультет: " + "id: " + id + "Имя: " + name + "Возраст: " + age;
+        return "Факультет: " + faculty + "id: " + id + " Имя: " + name + " Возраст: " + age;
     }
 
     @Override

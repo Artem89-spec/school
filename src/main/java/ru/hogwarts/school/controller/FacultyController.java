@@ -2,7 +2,7 @@
 
     import org.springframework.http.ResponseEntity;
     import org.springframework.web.bind.annotation.*;
-    import ru.hogwarts.school.model.Faculty;
+    import ru.hogwarts.school.model.Sudent;
     import ru.hogwarts.school.model.Student;
     import ru.hogwarts.school.service.FacultyService;
 
@@ -19,12 +19,12 @@
         }
 
         @PostMapping
-        public Faculty createFaculty(@RequestBody Faculty faculty) {
+        public Sudent createFaculty(@RequestBody Sudent faculty) {
             return facultyService.createFaculty(faculty);
         }
 
         @PostMapping("/params")
-        public Faculty createFacultyWithParameters(@RequestParam String name, @RequestParam String color) {
+        public Sudent createFacultyWithParameters(@RequestParam String name, @RequestParam String color) {
             return facultyService.createFacultyWithParameters(name, color);
         }
 
@@ -35,12 +35,12 @@
          * @return
          */
         @GetMapping("{id}")
-        public Faculty getFaculty(@PathVariable long id) {
+        public Sudent getFaculty(@PathVariable long id) {
             return facultyService.findFaculties(id);
         }
 
         @GetMapping("/all")
-        public Collection<Faculty> getAllFaculties() {
+        public Collection<Sudent> getAllFaculties() {
             return facultyService.getAllFaculties();
         }
 
@@ -51,7 +51,7 @@
          * @return
          */
         @PutMapping
-        public Faculty editFaculty(@RequestBody Faculty faculty) {
+        public Sudent editFaculty(@RequestBody Sudent faculty) {
             return facultyService.editFaculty(faculty);
         }
 
@@ -61,7 +61,7 @@
         }
 
         @GetMapping("filter")
-        public ResponseEntity<Collection<Faculty>> filteredFaculty(
+        public ResponseEntity<Collection<Sudent>> filteredFaculty(
                 @RequestParam(required = false) String color,
                 @RequestParam(required = false) String facultyName) {
             if (color != null && !color.isBlank()) {
@@ -75,7 +75,7 @@
 
         @GetMapping("{facultyId}/students")
         public ResponseEntity<Collection<Student>> findStudentsByFaculty(@PathVariable Long facultyId) {
-            Faculty faculty = facultyService.findFaculties(facultyId);
+            Sudent faculty = facultyService.findFaculties(facultyId);
             return ResponseEntity.ok(faculty.getStudents());
         }
     }
