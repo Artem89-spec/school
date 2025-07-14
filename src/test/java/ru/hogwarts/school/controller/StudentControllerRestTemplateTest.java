@@ -29,7 +29,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class StudentControllerRestTemplateTest {
     @LocalServerPort
     private int port;
-    private TestRestTemplate restTemplate = new TestRestTemplate();
+    @Autowired
+    private TestRestTemplate restTemplate;
     @Autowired
     private StudentRepository studentRepository;
     @Autowired
