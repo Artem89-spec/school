@@ -1,7 +1,6 @@
 package ru.hogwarts.school.controller;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,7 +13,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.hogwarts.school.model.Sudent;
+import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.FacultyRepository;
 import ru.hogwarts.school.repository.StudentRepository;
@@ -36,39 +35,55 @@ class StudentControllerRestTemplateTest {
     @Autowired
     private FacultyRepository facultyRepository;
 
-    private Student expectedStudent;
-    private Student studentOne;
-    private Student studentTwo;
-    private List<Student> expectedStudents;
-
     @BeforeEach
     void setUp() {
         facultyRepository.deleteAll();
         studentRepository.deleteAll();
-
-        expectedStudent = new Student();
-        expectedStudent.setName("nameStudent");
-        expectedStudent.setAge(15);
-        expectedStudent = studentRepository.save(expectedStudent);
-
-        studentOne = new Student();
-        studentOne.setName("nameStudentOne");
-        studentOne.setAge(19);
-        studentOne = studentRepository.save(studentOne);
-        studentTwo = new Student();
-        studentTwo.setName("nameStudentTwo");
-        studentTwo.setAge(20);
-        studentTwo = studentRepository.save(studentTwo);
-        expectedStudents = Arrays.asList(expectedStudent, studentOne, studentTwo);
     }
 
     private String getUrl(String path) {
         return "http://localhost:%d%s".formatted(port, path);
     }
 
+    private Faculty createFaculty(String name, String color) {
+        Faculty expectedFaculty = new Faculty();
+        expectedFaculty.setName(name);
+        expectedFaculty.setColor(color);
+        return expectedFaculty;
+    }
+
+    private Faculty addFaculty(String name, String color) {
+        return facultyRepository.save(createFaculty(name, color));
+    }
+
+    private Student createStudent(String name, int age) {
+        Student expectedStudent = new Student();
+        expectedStudent.setName(name);
+        expectedStudent.setAge(age);
+        return expectedStudent;
+    }
+
+    private Student addStudent(String name, int age) {
+        return studentRepository.save(createStudent(name, age));
+    }
+
+    private Student createStudentWithFaculty(String name, int age, Faculty faculty) {
+        Student expectedStudent = new Student();
+        expectedStudent.setName(name);
+        expectedStudent.setAge(age);
+        expectedStudent.setFaculty(faculty);
+        return expectedStudent;
+    }
+
+    private Student addStudentWithFaculty(String name, int age, Faculty  faculty) {
+        return studentRepository.save(createStudentWithFaculty(name, age, faculty));
+    }
+
     @Test
     @DisplayName("Создает корректного студента")
     void whenCreateStudent_ThenCreateCorrectStudent() throws Exception {
+        Student expectedStudent = addStudent("nameStudent", 15);
+
         String url = getUrl("/student");
 
         ResponseEntity<Student> actualStudentResponse = restTemplate.postForEntity(url, expectedStudent, Student.class);
@@ -83,6 +98,8 @@ class StudentControllerRestTemplateTest {
     @Test
     @DisplayName("Создает корректного студента с заданными параметрами")
     void createStudentWithParameters() throws Exception {
+        Student expectedStudent = addStudent("nameStudent", 15);
+
         String url = getUrl("/student/params?name=" + expectedStudent.getName() + "&age=" + expectedStudent.getAge());
 
         ResponseEntity<Student> actualStudentResponse = restTemplate.postForEntity(url, null, Student.class);
@@ -98,6 +115,8 @@ class StudentControllerRestTemplateTest {
     @Test
     @DisplayName("Возвращает корректного студента")
     void whenGetStudent_ThenReturnCorrectStudent() throws Exception {
+        Student expectedStudent = addStudent("nameStudent", 15);
+
         String url = getUrl("/student/%d".formatted(expectedStudent.getId()));
 
         ResponseEntity<Student> actualStudent = restTemplate.getForEntity(url, Student.class);
@@ -109,6 +128,10 @@ class StudentControllerRestTemplateTest {
     @Test
     @DisplayName("Возвращает всех студентов")
     void whenGetAllStudents_ThenReturnAllCorrectsStudents() throws Exception {
+        Student studentOne = addStudent("nameStudentOne", 19);
+        Student studentTwo = addStudent("nameStudentTwo", 20);
+        List<Student> expectedStudents = Arrays.asList(studentOne, studentTwo);
+
         String url = getUrl("/student/all");
 
         ResponseEntity<Student[]> responseStudents = restTemplate.getForEntity(url, Student[].class);
@@ -127,6 +150,8 @@ class StudentControllerRestTemplateTest {
     @Test
     @DisplayName("Изменяет данные о студенте")
     void whenEditStudent_ThenReturnCorrectEditStudent() throws Exception {
+        Student expectedStudent = addStudent("nameStudent", 15);
+
         Student existingStudent = studentRepository.findById(expectedStudent.getId()).orElseThrow();
         existingStudent.setName("newNameStudent");
         existingStudent.setAge(22);
@@ -152,6 +177,8 @@ class StudentControllerRestTemplateTest {
     @Test
     @DisplayName("Удаляет студента")
     void whenRemoveStudent_ThenStudentIsRemoved() throws Exception {
+        Student expectedStudent = addStudent("nameStudent", 15);
+
         String url = getUrl("/student/%d".formatted(expectedStudent.getId()));
 
         ResponseEntity<Void> response = restTemplate.exchange(
@@ -169,6 +196,8 @@ class StudentControllerRestTemplateTest {
     @Test
     @DisplayName("Находит всех студентов по конкретному возрасту или диапазону возрастов")
     void whenFilteredStudents_ThenStudentsIsFiltered() throws Exception {
+        Student expectedStudent = addStudent("nameStudent", 15);
+
         String url = getUrl("/student/filter?name=" + expectedStudent.getName() + "&age=" + expectedStudent.getAge());
 
         ResponseEntity<Student[]> response = restTemplate.getForEntity(url, Student[].class);
@@ -180,45 +209,32 @@ class StudentControllerRestTemplateTest {
         assertTrue(actualStudents.length > 0);
 
         List<Student> actualStudentList = Arrays.asList(actualStudents);
-        assertNotNull(actualStudentList);
-        assertTrue(actualStudentList.stream().allMatch(student ->
-                (expectedStudent.getAge() == 0 ||
-                        expectedStudent.getAge() == (student.getAge())) &&
-                        (expectedStudent.getName() == null || expectedStudent.getName().isEmpty() ||
-                                expectedStudent.getName().equals(student.getName()))));
+        assertTrue(actualStudentList.stream()
+                .allMatch(student ->
+                        student.getAge() == expectedStudent.getAge()
+                                && student.getName().equals(expectedStudent.getName())));
+
+        assertEquals(1, actualStudents.length);
     }
 
     @Test
     @DisplayName("Находит факультет студента")
     void whenFindFacultyByStudent_ThenFacultyByStudentAreFound() throws Exception {
-        Sudent facultyTest = new Sudent();
-        facultyTest.setName("testName");
-        facultyTest.setColor("testColor");
-        facultyTest = facultyRepository.save(facultyTest);
-
-        Student student1 = new Student();
-        student1.setName("Poll");
-        student1.setAge(23);
-        student1.setFaculty(facultyTest);
-
-        Student student2 = new Student();
-        student2.setName("Fill");
-        student2.setAge(21);
-        student2.setFaculty(facultyTest);
+        Faculty expectedFaculty = addFaculty("nameFaculty", "color");
+        Student student1 = addStudentWithFaculty("Bill", 20, expectedFaculty);
+        Student student2 = addStudentWithFaculty("Bob", 15, expectedFaculty);
 
         studentRepository.saveAll(Arrays.asList(student1, student2));
 
-        System.out.println("Faculty ID after save: " + facultyTest.getId());
-
         String url = getUrl("/student/%d/faculty".formatted(student1.getId()));
 
-        ResponseEntity<Sudent> response = restTemplate.getForEntity(url, Sudent.class);
+        ResponseEntity<Faculty> response = restTemplate.getForEntity(url, Faculty.class);
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
 
-        Sudent faculty = response.getBody();
+        Faculty faculty = response.getBody();
         assertNotNull(faculty);
         assertNotNull(faculty.getStudents());
-        assertEquals(facultyTest.getId(), faculty.getId());
+        assertEquals(expectedFaculty.getId(), faculty.getId());
     }
 }

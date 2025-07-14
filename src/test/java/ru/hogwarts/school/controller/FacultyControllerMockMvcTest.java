@@ -13,7 +13,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import ru.hogwarts.school.model.Sudent;
+import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.FacultyRepository;
 
@@ -37,32 +37,31 @@ class FacultyControllerMockMvcTest {
     @MockitoBean
     private FacultyRepository facultyRepository;
 
-    private Sudent expectedFaculty;
-    private Sudent facultyOne;
-    private Sudent facultyTwo;
-    private List<Sudent> faculties;
-
     @BeforeEach
     void setUp() {
-        expectedFaculty = new Sudent();
-        expectedFaculty.setName("nameFaculty");
-        expectedFaculty.setColor("color");
+    }
 
-        facultyOne = new Sudent();
-        facultyOne.setName("nameFacultyOne");
-        facultyOne.setColor("colorOne");
-        facultyTwo = new Sudent();
-        facultyOne.setName("nameFacultyTwo");
-        facultyOne.setColor("colorTwo");
-        faculties = Arrays.asList(facultyOne, facultyTwo);
+    private Faculty createFaculty(String name, String color) {
+        Faculty expectedFaculty = new Faculty();
+        expectedFaculty.setName(name);
+        expectedFaculty.setColor(color);
+        return expectedFaculty;
+    }
+
+    private Student createStudent(String name, int age) {
+        Student expectedStudent = new Student();
+        expectedStudent.setName(name);
+        expectedStudent.setAge(age);
+        return expectedStudent;
     }
 
     @Test
     @DisplayName("Создает корректный факультет")
     void whenCreateFaculty_ThenCreateCorrectFaculty() throws Exception {
+        Faculty expectedFaculty = createFaculty("nameFaculty", "color");
         String jsonContent = objectMapper.writeValueAsString(expectedFaculty);
 
-        when(facultyRepository.save(any(Sudent.class))).thenReturn(expectedFaculty);
+        when(facultyRepository.save(any(Faculty.class))).thenReturn(expectedFaculty);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/faculty")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -73,7 +72,9 @@ class FacultyControllerMockMvcTest {
     @Test
     @DisplayName("Создает корректный факультет с заданными параметрами")
     void whenCreateFacultyWithParameters_ThenCreateCorrectFacultyWithParameters() throws Exception {
-        when(facultyRepository.save(any(Sudent.class))).thenReturn(expectedFaculty);
+        Faculty expectedFaculty = createFaculty("nameFaculty", "color");
+
+        when(facultyRepository.save(any(Faculty.class))).thenReturn(expectedFaculty);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/faculty/params")
                         .param("name", expectedFaculty.getName())
@@ -87,6 +88,8 @@ class FacultyControllerMockMvcTest {
     @Test
     @DisplayName("Возвращает корректный факультет")
     void whenGetFaculty_ThenReturnCorrectFaculty() throws Exception {
+        Faculty expectedFaculty = createFaculty("nameFaculty", "color");
+
         when(facultyRepository.findById(expectedFaculty.getId())).thenReturn(Optional.of(expectedFaculty));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/faculty/%d".formatted(expectedFaculty.getId())))
@@ -99,12 +102,16 @@ class FacultyControllerMockMvcTest {
     @Test
     @DisplayName("Возвращает все факультеты")
     void whenGetAllFaculties_ThenReturnAllCorrectsFaculties() throws Exception {
-        when(facultyRepository.findAll()).thenReturn(faculties);
+        Faculty facultyOne = createFaculty("facultyName1", "color1");
+        Faculty facultyTwo = createFaculty("facultyName2", "color2");
+        List<Faculty> expectedFaculties = Arrays.asList(facultyOne, facultyTwo);
+
+        when(facultyRepository.findAll()).thenReturn(expectedFaculties);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/faculty/all"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$").exists())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(faculties.size()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(expectedFaculties.size()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value(facultyOne.getName()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[1].name").value(facultyTwo.getName()));
     }
@@ -112,11 +119,13 @@ class FacultyControllerMockMvcTest {
     @Test
     @DisplayName("Изменяет данные о факультете")
     void whenEditFaculty_ThenReturnCorrectEditFaculty() throws Exception {
+        Faculty expectedFaculty = createFaculty("nameFaculty", "color");
         expectedFaculty.setName("newFacultyName");
         expectedFaculty.setColor("newColor");
+
         String jsonContent = objectMapper.writeValueAsString(expectedFaculty);
 
-        when(facultyRepository.save(any(Sudent.class))).thenReturn(expectedFaculty);
+        when(facultyRepository.save(any(Faculty.class))).thenReturn(expectedFaculty);
 
         mockMvc.perform(MockMvcRequestBuilders.put("/faculty")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -129,6 +138,8 @@ class FacultyControllerMockMvcTest {
     @Test
     @DisplayName("Удаляет факультет")
     void whenRemoveFaculty_ThenFacultyIsRemoved() throws Exception {
+        Faculty expectedFaculty = createFaculty("nameFaculty", "color");
+
         when(facultyRepository.existsById(expectedFaculty.getId())).thenReturn(true);
         doNothing().when(facultyRepository).deleteById(expectedFaculty.getId());
 
@@ -140,10 +151,14 @@ class FacultyControllerMockMvcTest {
     @Test
     @DisplayName("Находит факультеты по параметрам цвета или названия")
     void whenFilteredFaculty_ThenFacultyIsFiltered() throws Exception {
+        Faculty facultyOne = createFaculty("facultyNameOne", "colorOne");
+        Faculty facultyTwo = createFaculty("facultyNameTwo", "colorTwo");
+        List<Faculty> expectedFaculties = Arrays.asList(facultyOne, facultyTwo);
+
         String jsonArrayFaculties = objectMapper.writeValueAsString(Arrays.asList(facultyOne, facultyTwo));
 
-        when(facultyRepository.findByColor("colorOne")).thenReturn(faculties);
-        when(facultyRepository.findByNameIgnoreCase("nameFacultyTwo")).thenReturn(faculties);
+        when(facultyRepository.findByColor("colorOne")).thenReturn(expectedFaculties);
+        when(facultyRepository.findByNameIgnoreCase("facultyNameTwo")).thenReturn(expectedFaculties);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/faculty/filter")
                         .param("color", "colorOne"))
@@ -151,7 +166,7 @@ class FacultyControllerMockMvcTest {
                 .andExpect(MockMvcResultMatchers.content().json(jsonArrayFaculties));
 
         mockMvc.perform((MockMvcRequestBuilders.get("/faculty/filter"))
-                        .param("facultyName", "nameFacultyTwo"))
+                        .param("facultyName", "facultyNameTwo"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().json(jsonArrayFaculties));
 
@@ -170,12 +185,13 @@ class FacultyControllerMockMvcTest {
                 .andExpect(MockMvcResultMatchers.content().json("[]"));
 
         verify(facultyRepository).findByColor("colorOne");
-        verify(facultyRepository).findByNameIgnoreCase("nameFacultyTwo");
+        verify(facultyRepository).findByNameIgnoreCase("facultyNameTwo");
     }
 
     @Test
     @DisplayName("Находит всех студентов заданного факультета")
     void whenFindStudentsByFaculty_ThenStudentsByFacultyAreFound() throws Exception {
+        Faculty expectedFaculty = createFaculty("nameFaculty", "color");
         Student student1 = new Student(1, "Bill", 20);
         Student student2 = new Student(2, "Bob", 15);
 

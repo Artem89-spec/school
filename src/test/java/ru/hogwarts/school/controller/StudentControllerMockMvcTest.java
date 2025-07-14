@@ -12,7 +12,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import ru.hogwarts.school.model.Sudent;
+import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.StudentRepository;
 
@@ -36,33 +36,29 @@ class StudentControllerMockMvcTest {
     @MockitoBean
     private StudentRepository studentRepository;
 
-    private Student expectedStudent;
-    private Student studentOne;
-    private Student studentTwo;
-    private Student studentThree;
-    private List<Student> students;
-
     @BeforeEach
     void setUp() {
-        expectedStudent = new Student();
-        expectedStudent.setName("nameStudent");
-        expectedStudent.setAge(15);
+    }
 
-        studentOne = new Student();
-        studentOne.setName("nameStudentOne");
-        studentOne.setAge(19);
-        studentTwo = new Student();
-        studentTwo.setName("nameStudentTwo");
-        studentTwo.setAge(20);
-        studentThree = new Student();
-        studentThree.setName("nameStudentThree");
-        studentThree.setAge(21);
-        students = Arrays.asList(studentOne, studentTwo,studentThree);
+    private Faculty createFaculty(String name, String color) {
+        Faculty expectedFaculty = new Faculty();
+        expectedFaculty.setName(name);
+        expectedFaculty.setColor(color);
+        return expectedFaculty;
+    }
+
+    private Student createStudent(String name, int age) {
+        Student expectedStudent = new Student();
+        expectedStudent.setName(name);
+        expectedStudent.setAge(age);
+        return expectedStudent;
     }
 
     @Test
     @DisplayName("Создает корректного студента")
     void whenCreateStudent_ThenCreateCorrectStudent() throws Exception {
+        Student expectedStudent = createStudent("nameStudent", 15);
+
         String jsonContent = objectMapper.writeValueAsString(expectedStudent);
 
         when(studentRepository.save(any(Student.class))).thenReturn(expectedStudent);
@@ -76,6 +72,8 @@ class StudentControllerMockMvcTest {
     @Test
     @DisplayName("Создает корректного студента с заданными параметрами")
     void whenCreateStudentWithParameters_ThenCreateCorrectStudentWithParameters() throws Exception {
+        Student expectedStudent = createStudent("nameStudent", 15);
+
         when(studentRepository.save(any(Student.class))).thenReturn(expectedStudent);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/student/params")
@@ -85,12 +83,13 @@ class StudentControllerMockMvcTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$").exists())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(expectedStudent.getName()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.age").value(expectedStudent.getAge()));
-
     }
 
     @Test
     @DisplayName("Возвращает корректного студента")
     void whenGetStudent_ThenReturnCorrectStudent() throws Exception {
+        Student expectedStudent = createStudent("nameStudent", 15);
+
         when(studentRepository.findById(expectedStudent.getId())).thenReturn(Optional.of(expectedStudent));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/student/%d".formatted(expectedStudent.getId())))
@@ -98,18 +97,21 @@ class StudentControllerMockMvcTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$").exists())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(expectedStudent.getName()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.age").value(expectedStudent.getAge()));
-
     }
 
     @Test
     @DisplayName("Возвращает всех студентов")
     void whenGetAllStudents_ThenReturnAllCorrectsStudents() throws Exception {
-        when(studentRepository.findAll()).thenReturn(students);
+        Student studentOne = createStudent("nameStudentOne", 19);
+        Student studentTwo = createStudent("nameStudentTwo", 20);
+        List<Student> expectedStudents = Arrays.asList(studentOne, studentTwo);
+
+        when(studentRepository.findAll()).thenReturn(expectedStudents);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/student/all"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$").exists())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(students.size()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(expectedStudents.size()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value(studentOne.getName()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[1].name").value(studentTwo.getName()));
     }
@@ -117,6 +119,7 @@ class StudentControllerMockMvcTest {
     @Test
     @DisplayName("Изменяет данные о студенте")
     void whenEditStudent_ThenReturnCorrectEditStudent() throws Exception {
+        Student expectedStudent = createStudent("nameStudent", 15);
         expectedStudent.setName("newStudentName");
         expectedStudent.setAge(17);
         String jsonContent = objectMapper.writeValueAsString(expectedStudent);
@@ -134,6 +137,8 @@ class StudentControllerMockMvcTest {
     @Test
     @DisplayName("Удаляет студента")
     void whenRemoveStudent_ThenStudentIsRemoved() throws Exception {
+        Student expectedStudent = createStudent("nameStudent", 15);
+
         when(studentRepository.existsById(expectedStudent.getId())).thenReturn(true);
         doNothing().when(studentRepository).deleteById(expectedStudent.getId());
 
@@ -145,10 +150,15 @@ class StudentControllerMockMvcTest {
     @Test
     @DisplayName("Находит всех студентов по конкретному возрасту или диапазону возрастов")
     void whenFilteredStudents_ThenStudentsIsFiltered() throws Exception {
+        Student studentOne = createStudent("nameStudentOne", 19);
+        Student studentTwo = createStudent("nameStudentOne", 20);
+        Student studentThree = createStudent("nameStudentOne", 21);
+        List<Student> expectedStudents = Arrays.asList(studentOne, studentTwo, studentThree);
+
         String jsonArrayStudents = objectMapper.writeValueAsString(Arrays.asList(studentOne, studentTwo, studentThree));
 
-        when(studentRepository.findByAge(studentTwo.getAge())).thenReturn(students);
-        when(studentRepository.findByAgeBetween(studentOne.getAge(), studentThree.getAge())).thenReturn(students);
+        when(studentRepository.findByAge(studentTwo.getAge())).thenReturn(expectedStudents);
+        when(studentRepository.findByAgeBetween(studentOne.getAge(), studentThree.getAge())).thenReturn(expectedStudents);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/student/filter")
                         .param("age", String.valueOf(studentTwo.getAge())))
@@ -165,9 +175,9 @@ class StudentControllerMockMvcTest {
     @Test
     @DisplayName("Находит факультет студента")
     void whenFindFacultyByStudent_ThenFacultyByStudentAreFound() throws Exception {
-        Sudent facultyTest = new Sudent();
-        facultyTest.setName("facultyName");
-        facultyTest.setColor("facultyColor");
+        Faculty facultyTest = createFaculty("facultyName", "facultyColor");
+        Student expectedStudent = createStudent("nameStudent", 15);
+        Student studentOne = createStudent("nameStudentOne", 19);
 
         expectedStudent.setFaculty(facultyTest);
         studentOne.setFaculty(facultyTest);

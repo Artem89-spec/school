@@ -2,7 +2,7 @@
 
     import org.springframework.http.ResponseEntity;
     import org.springframework.web.bind.annotation.*;
-    import ru.hogwarts.school.model.Sudent;
+    import ru.hogwarts.school.model.Faculty;
     import ru.hogwarts.school.model.Student;
     import ru.hogwarts.school.service.FacultyService;
 
@@ -19,12 +19,12 @@
         }
 
         @PostMapping
-        public Sudent createFaculty(@RequestBody Sudent faculty) {
+        public Faculty createFaculty(@RequestBody Faculty faculty) {
             return facultyService.createFaculty(faculty);
         }
 
         @PostMapping("/params")
-        public Sudent createFacultyWithParameters(@RequestParam String name, @RequestParam String color) {
+        public Faculty createFacultyWithParameters(@RequestParam String name, @RequestParam String color) {
             return facultyService.createFacultyWithParameters(name, color);
         }
 
@@ -35,12 +35,12 @@
          * @return
          */
         @GetMapping("{id}")
-        public Sudent getFaculty(@PathVariable long id) {
+        public Faculty getFaculty(@PathVariable Long id) {
             return facultyService.findFaculties(id);
         }
 
         @GetMapping("/all")
-        public Collection<Sudent> getAllFaculties() {
+        public Collection<Faculty> getAllFaculties() {
             return facultyService.getAllFaculties();
         }
 
@@ -51,17 +51,17 @@
          * @return
          */
         @PutMapping
-        public Sudent editFaculty(@RequestBody Sudent faculty) {
+        public Faculty editFaculty(@RequestBody Faculty faculty) {
             return facultyService.editFaculty(faculty);
         }
 
         @DeleteMapping("{id}")
-        public void removeFaculty(@PathVariable long id) {
+        public void removeFaculty(@PathVariable Long id) {
             facultyService.removeFaculty(id);
         }
 
         @GetMapping("filter")
-        public ResponseEntity<Collection<Sudent>> filteredFaculty(
+        public ResponseEntity<Collection<Faculty>> filteredFaculty(
                 @RequestParam(required = false) String color,
                 @RequestParam(required = false) String facultyName) {
             if (color != null && !color.isBlank()) {
@@ -75,7 +75,7 @@
 
         @GetMapping("{facultyId}/students")
         public ResponseEntity<Collection<Student>> findStudentsByFaculty(@PathVariable Long facultyId) {
-            Sudent faculty = facultyService.findFaculties(facultyId);
+            Faculty faculty = facultyService.findFaculties(facultyId);
             return ResponseEntity.ok(faculty.getStudents());
         }
     }

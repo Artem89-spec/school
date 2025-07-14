@@ -1,30 +1,31 @@
 package ru.hogwarts.school.model;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.Collection;
 import java.util.Objects;
 
 @Entity
-//@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class Sudent {
+public class Faculty {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
     private String name;
     private String color;
 
-    @OneToMany(mappedBy = "faculty", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "faculty", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonManagedReference
     private Collection<Student> students;
 
-    public Sudent() {
+    public Faculty() {
     }
 
-    public Sudent(long id, String name, String color) {
+    public Faculty(long id, String name, String color) {
         this.id = id;
         this.name = name;
         this.color = color;
@@ -74,7 +75,7 @@ public class Sudent {
         } else if (other == null || this.getClass() != other.getClass()) {
             return false;
         }
-        Sudent object = (Sudent) other;
+        Faculty object = (Faculty) other;
         return id == object.id && Objects.equals(name, object.name) && Objects.equals(color, object.color);
     }
 

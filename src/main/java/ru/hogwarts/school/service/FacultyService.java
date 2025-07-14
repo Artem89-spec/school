@@ -3,7 +3,7 @@ package ru.hogwarts.school.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.hogwarts.school.exception.ObjectNotFoundException;
-import ru.hogwarts.school.model.Sudent;
+import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.repository.FacultyRepository;
 
 import java.util.*;
@@ -17,41 +17,41 @@ public class FacultyService implements ExceptionService {
         this.facultyRepository = facultyRepository;
     }
 
-    public Sudent createFaculty(Sudent faculty) {
+    public Faculty createFaculty(Faculty faculty) {
         return facultyRepository.save(faculty);
     }
 
-    public Sudent createFacultyWithParameters(String name, String color) {
-        Sudent newFaculty = new Sudent();
+    public Faculty createFacultyWithParameters(String name, String color) {
+        Faculty newFaculty = new Faculty();
         newFaculty.setName(name);
         newFaculty.setColor(color);
         return facultyRepository.save(newFaculty);
     }
 
-    public Sudent findFaculties(long id) {
-        return getEntityOrThrow(facultyRepository.findById(id), id, Sudent.class);
+    public Faculty findFaculties(long id) {
+        return getEntityOrThrow(facultyRepository.findById(id), id, Faculty.class);
     }
 
-    public Sudent editFaculty(Sudent faculty) {
-        return checkNotNull(facultyRepository.save(faculty), faculty, Sudent.class);
+    public Faculty editFaculty(Faculty faculty) {
+        return checkNotNull(facultyRepository.save(faculty), faculty, Faculty.class);
     }
 
     public void removeFaculty(long id) {
         if (!facultyRepository.existsById(id)) {
-            throw new ObjectNotFoundException(id, Sudent.class);
+            throw new ObjectNotFoundException(id, Faculty.class);
         }
         facultyRepository.deleteById(id);
     }
 
-    public Collection<Sudent> getAllFaculties() {
+    public Collection<Faculty> getAllFaculties() {
         return facultyRepository.findAll();
     }
 
-    public Collection<Sudent> filteredFacultyByColor(String color) {
+    public Collection<Faculty> filteredFacultyByColor(String color) {
         return facultyRepository.findByColor(color);
     }
 
-    public Collection<Sudent> filteredFacultyByName(String name) {
+    public Collection<Faculty> filteredFacultyByName(String name) {
         return facultyRepository.findByNameIgnoreCase(name);
     }
 }
