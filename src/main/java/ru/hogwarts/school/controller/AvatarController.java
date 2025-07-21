@@ -13,6 +13,7 @@ import ru.hogwarts.school.service.AvatarService;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 @RestController
 @RequestMapping("avatar")
@@ -44,7 +45,7 @@ public class AvatarController {
     }
 
     @GetMapping(value = "/{id}/avatar")
-    public void downloadAvatar(@PathVariable Long id, @RequestParam HttpServletResponse response) throws IOException {
+    public void downloadAvatar(@PathVariable Long id,  HttpServletResponse response) throws IOException {
         Avatar avatar = avatarService.findAvatar(id);
 
         Path path = Path.of(avatar.getFilePath());
@@ -53,5 +54,11 @@ public class AvatarController {
         response.setContentLength((int) avatar.getFileSize());
 
         Files.copy(path, response.getOutputStream());
+    }
+
+    @GetMapping("/page")
+    public ResponseEntity<List<Avatar>> getAllAvatars(@RequestParam("page") Integer pageNumber, @RequestParam("size") Integer pageSize) {
+        List<Avatar> avatars = avatarService.findAllAvatars(pageNumber, pageSize);
+        return ResponseEntity.ok(avatars);
     }
 }

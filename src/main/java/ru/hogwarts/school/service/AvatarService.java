@@ -2,6 +2,7 @@ package ru.hogwarts.school.service;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.hogwarts.school.exception.ObjectNotFoundException;
@@ -16,6 +17,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.List;
 
 
 @Service
@@ -50,6 +52,7 @@ public class AvatarService implements ExceptionService {
         avatar.setStudent(student);
         avatar.setMediaType(avatarFile.getContentType());
         avatar.setFileSize(avatarFile.getSize());
+        avatar.setData(avatarFile.getBytes());
 
         avatarRepository.save(avatar);
     }
@@ -80,5 +83,10 @@ public class AvatarService implements ExceptionService {
             ImageIO.write(preview, getExtension(filePath.getFileName().toString()), baos);
             return baos.toByteArray();
         }
+    }
+
+    public List<Avatar> findAllAvatars(Integer pageNumber, Integer pageSize) {
+        PageRequest pageRequest = PageRequest.of(pageNumber  - 1, pageSize);
+        return avatarRepository.findAll(pageRequest).getContent();
     }
 }
