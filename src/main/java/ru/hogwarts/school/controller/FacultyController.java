@@ -35,7 +35,7 @@
          * @return
          */
         @GetMapping("{id}")
-        public Faculty getFaculty(@PathVariable long id) {
+        public Faculty getFaculty(@PathVariable Long id) {
             return facultyService.findFaculties(id);
         }
 
@@ -56,7 +56,7 @@
         }
 
         @DeleteMapping("{id}")
-        public void removeFaculty(@PathVariable long id) {
+        public void removeFaculty(@PathVariable Long id) {
             facultyService.removeFaculty(id);
         }
 

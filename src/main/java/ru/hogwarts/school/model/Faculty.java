@@ -1,6 +1,7 @@
 package ru.hogwarts.school.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
@@ -11,21 +12,20 @@ import java.util.Objects;
 public class Faculty {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     private String name;
     private String color;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "faculty", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "faculty", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonManagedReference
     private Collection<Student> students;
 
-    public Faculty(){
+    public Faculty() {
     }
 
-    public Faculty(long id, String name,  String color) {
+    public Faculty(long id, String name, String color) {
         this.id = id;
         this.name = name;
         this.color = color;
@@ -65,14 +65,14 @@ public class Faculty {
 
     @Override
     public String toString() {
-        return "Факультет: " + "id: " + id + "Название: " + name + "Цвет: " + color;
+        return "Факультет: " + "id: " + id + " Название: " + name + " Цвет: " + color;
     }
 
     @Override
     public boolean equals(Object other) {
         if (this == other) {
             return true;
-        } else if(other == null || this.getClass() != other.getClass()) {
+        } else if (other == null || this.getClass() != other.getClass()) {
             return false;
         }
         Faculty object = (Faculty) other;

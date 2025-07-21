@@ -9,7 +9,7 @@ import java.util.Objects;
 public class Student {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     private String name;
@@ -63,7 +63,7 @@ public class Student {
 
     @Override
     public String toString() {
-        return "Факультет: " + "id: " + id + "Имя: " + name + "Возраст: " + age;
+        return "Факультет: " + faculty + "id: " + id + " Имя: " + name + " Возраст: " + age;
     }
 
     @Override
