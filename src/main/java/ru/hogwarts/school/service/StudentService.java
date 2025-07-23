@@ -55,4 +55,20 @@ public class StudentService implements ExceptionService {
     public Collection<Student> findByAgeBetween(int startAge, int endAge) {
         return studentRepository.findByAgeBetween(startAge, endAge);
     }
+
+    public int getStudentsCount() {
+        return studentRepository.countAllStudents();
+    }
+
+    public double getAverageAgeOfStudents() {
+        Double avg = studentRepository.averageAgeOfStudents();
+        if (avg == null) {
+            throw new  ObjectNotFoundException("Average age not found", Student.class);
+        }
+        return avg;
+    }
+
+    public List<Student> getLastFiveStudents()  {
+       return studentRepository.findLastFiveStudents();
+    }
 }
