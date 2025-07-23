@@ -17,6 +17,11 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     @Query(value = "select avg(age) from student", nativeQuery = true)
     Double averageAgeOfStudents();
 
+    /**
+     * Внешний под-запрос сортирует записи в порядке их добавления по id хронологически, хоть и предполагаю что записи все
+     * равно перемешаются когда буду вносить в них изменения
+     * @return
+     */
     @Query(value = "select * from (select * from student order by id desc limit 5) sub order by id asc", nativeQuery = true)
     List<Student> findLastFiveStudents();
 }

@@ -2,6 +2,7 @@ package ru.hogwarts.school.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.hogwarts.school.exception.NoStudentsNotFoundException;
 import ru.hogwarts.school.exception.ObjectNotFoundException;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.StudentRepository;
@@ -63,7 +64,7 @@ public class StudentService implements ExceptionService {
     public double getAverageAgeOfStudents() {
         Double avg = studentRepository.averageAgeOfStudents();
         if (avg == null) {
-            throw new  ObjectNotFoundException("Average age not found", Student.class);
+            throw new NoStudentsNotFoundException();
         }
         return avg;
     }
