@@ -79,7 +79,7 @@ public class StudentController {
         return studentService.getAverageAgeOfStudents();
     }
 
-    @GetMapping("/last students")
+    @GetMapping("/last-students")
     public List<Student> findLastFiveStudents() {
         return studentService.getLastFiveStudents();
     }
