@@ -78,4 +78,9 @@
             Faculty faculty = facultyService.findFaculties(facultyId);
             return ResponseEntity.ok(faculty.getStudents());
         }
+
+        @GetMapping("longest-faculty-name")
+        public String findLongestFacultyName() {
+            return facultyService.getLongestFacultyName();
+        }
     }

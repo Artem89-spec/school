@@ -93,4 +93,20 @@ public class FacultyService implements ExceptionService {
         logger.debug("Faculty with name {} found: {}", name, faculties);
         return faculties;
     }
+
+    public String getLongestFacultyName() {
+        logger.info("Method getLongestFacultyName invoked");
+        List<Faculty> faculties = facultyRepository.findAll();
+        if (faculties.isEmpty()) {
+            logger.warn("No faculty found");
+        }
+        String longestNameFaculty = faculties
+                .stream()
+                .filter(faculty -> faculty.getName() != null)
+                .max(Comparator.comparingInt(faculty -> faculty.getName().length()))
+                .map(Faculty::getName)
+                .orElse(null);
+        logger.debug("Faculty with  longest name found: {}", longestNameFaculty);
+        return longestNameFaculty;
+    }
 }
