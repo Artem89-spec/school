@@ -57,7 +57,7 @@ public class StudentService implements ExceptionService {
     }
 
     public void removeStudent(long id) {
-        logger.info("Method removeStudent with iD {} invoked",  id);
+        logger.info("Method removeStudent with iD {} invoked", id);
         if (!studentRepository.existsById(id)) {
             logger.error("Student with id {} does not exist", id);
             throw new ObjectNotFoundException(id, Student.class);
@@ -120,5 +120,51 @@ public class StudentService implements ExceptionService {
         }
         logger.debug("Number of last five students: {}", students.size());
         return students;
+    }
+
+    public List<String> getStudentsByNameStartsWithSymbol(String symbol) {
+        logger.info("Method getStudentsByNameStartsWithSymbol invoked");
+
+        validateSymbol(symbol);
+
+        List<String> result = studentRepository
+                .findAll()
+                .stream()
+                .map(Student::getName)
+                .filter(name -> name != null
+                        && !name.isEmpty()
+                        && name.toLowerCase().startsWith(symbol.toLowerCase()))
+                .map(String::toUpperCase)
+                .sorted()
+                .toList();
+
+        logger.debug("Found students with names starting with a symbol {}: {}", symbol, result.size());
+        return result;
+    }
+
+    public double getAverageAgeOfStudentsStream() {
+        logger.info("Method getAverageAgeOfStudentsStream invoked");
+        List<Student> students = studentRepository.findAll();
+        if (students.isEmpty()) {
+            logger.error("Not found students to calculate average age");
+            return 0.0;
+        }
+        Double result = students
+                .stream()
+                .filter(student -> student.getAge() != 0)
+                .mapToInt(Student::getAge)
+                .average()
+                .orElse(0.0);
+        logger.debug("The average age of the students was {}", result);
+        return result;
+    }
+
+    public long calculateSum() {
+        long start = System.currentTimeMillis();
+        long n = 1_000_000;
+        long sum = n * (n + 1) / 2;
+        logger.debug("Calculate sum {}", sum);
+        logger.debug("Время выполнения: {} мс.", System.currentTimeMillis() - start);
+        return sum;
     }
 }

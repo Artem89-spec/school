@@ -83,4 +83,19 @@ public class StudentController {
     public List<Student> findLastFiveStudents() {
         return studentService.getLastFiveStudents();
     }
+
+    @GetMapping("/names-start-with-symbol")
+    public List<String> findStudentsByNameStartsWithSymbol(@RequestParam("symbol") String symbol) {
+        return studentService.getStudentsByNameStartsWithSymbol(symbol);
+    }
+
+    @GetMapping("/average-stream")
+    public double getAverageAgeOfStudentsStream() {
+        return studentService.getAverageAgeOfStudentsStream();
+    }
+
+    @GetMapping("calculate-sum")
+    public long calculateSum() {
+        return studentService.calculateSum();
+    }
 }
