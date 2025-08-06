@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.hogwarts.school.exception.NoFacultyNameException;
 import ru.hogwarts.school.exception.ObjectNotFoundException;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.repository.FacultyRepository;
@@ -105,7 +106,7 @@ public class FacultyService implements ExceptionService {
                 .filter(faculty -> faculty.getName() != null)
                 .max(Comparator.comparingInt(faculty -> faculty.getName().length()))
                 .map(Faculty::getName)
-                .orElse(null);
+                .orElseThrow(NoFacultyNameException::new);
         logger.debug("Faculty with  longest name found: {}", longestNameFaculty);
         return longestNameFaculty;
     }

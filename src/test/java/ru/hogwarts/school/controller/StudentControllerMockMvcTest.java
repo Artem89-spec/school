@@ -24,7 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @AutoConfigureMockMvc
-@SpringBootTest
+@SpringBootTest(properties = {"server.port=8080"})
 class StudentControllerMockMvcTest {
 
     @Autowired
@@ -38,6 +38,7 @@ class StudentControllerMockMvcTest {
 
     @BeforeEach
     void setUp() {
+        // TODO Этот метод подготовит тестовую среду перед каждым тестом
     }
 
     private Faculty createFaculty(String name, String color) {
@@ -193,5 +194,23 @@ class StudentControllerMockMvcTest {
                 .andExpect(MockMvcResultMatchers.content().json(jsonFaculty));
 
         verify(studentRepository).findById(expectedStudent.getId());
+    }
+
+    @Test
+    @DisplayName("Выводит сообщение об успешном вызове эндпоинта")
+    void testPrintStudentsNameParallel() throws Exception {
+        String message = "Вывод имен студентов в параллельном режиме завершён";
+        mockMvc.perform(MockMvcRequestBuilders.get("/student/print-parallel"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().string(message));
+    }
+
+    @Test
+    @DisplayName("Выводит сообщение об успешном вызове эндпоинта")
+    void testPrintStudentsNameSynchronized() throws Exception {
+        String message = "Вывод имен студентов в синхронизированном режиме завершён";
+        mockMvc.perform(MockMvcRequestBuilders.get("/student/print-synchronized"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().string(message));
     }
 }
