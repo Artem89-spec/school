@@ -98,4 +98,16 @@ public class StudentController {
     public long calculateSum() {
         return studentService.calculateSum();
     }
+
+    @GetMapping("print-parallel")
+    public ResponseEntity<String> printStudentsNameParallel() {
+        studentService.printStudentsNameParallel();
+        return ResponseEntity.ok("Вывод имен студентов в параллельном режиме завершён");
+    }
+
+    @GetMapping("print-synchronized")
+    public ResponseEntity<String> printStudentsNameSynchronized() {
+        studentService.printStudentNamesSynchronized();
+        return ResponseEntity.ok("Вывод имен студентов в синхронизированном режиме завершён");
+    }
 }

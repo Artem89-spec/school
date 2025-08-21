@@ -12,7 +12,7 @@ import ru.hogwarts.school.repository.StudentRepository;
 import java.util.*;
 
 @Service
-public class StudentService implements ExceptionService {
+public class StudentService implements ExceptionService, SynchronizationService {
     private final StudentRepository studentRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(StudentService.class);
@@ -167,4 +167,93 @@ public class StudentService implements ExceptionService {
         logger.debug("Время выполнения: {} мс.", System.currentTimeMillis() - start);
         return sum;
     }
+
+
+    public void printStudentsNameParallel() {
+        logger.info("Method printStudentsNameParallel invoked");
+
+        List<Student> students = studentRepository.findAll();
+        logger.debug("Total students: {}", students.size());
+
+        if(students.size() < 6) {
+            logger.debug("Minimum of 6 students in the list");
+            return;
+        }
+
+        String first = students.get(0).getName();
+        String second = students.get(1).getName();
+        String third = students.get(2).getName();
+        String fourth = students.get(3).getName();
+        String fifth = students.get(4).getName();
+        String sixth = students.get(5).getName();
+
+        System.out.println(first);
+        System.out.println(second);
+
+        Thread thread1 = new Thread(() -> {
+            logger.info("The tread first is started");
+            System.out.println(third);
+            System.out.println(fourth);
+        });
+        thread1.start();
+
+        Thread thread2 = new Thread(() -> {
+            logger.info("The tread second is started");
+            System.out.println(fifth);
+            System.out.println(sixth);
+        });
+        thread2.start();
+
+        try {
+            logger.info("Waiting for parallel threads to finish");
+            thread1.join();
+            thread2.join();
+        } catch (InterruptedException e) {
+            logger.warn("The threads were interrupted", e);
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    public void printStudentNamesSynchronized() {
+        logger.info("Method printStudentNamesSynchronized invoked");
+        List<Student> students = studentRepository.findAll();
+
+        if (students.size() < 6) {
+            logger.debug("Minimum of six students in the list");
+            return;
+        }
+
+        String first = students.get(0).getName();
+        String second = students.get(1).getName();
+        String third = students.get(2).getName();
+        String fourth = students.get(3).getName();
+        String fifth = students.get(4).getName();
+        String sixth = students.get(5).getName();
+
+        printSynchronized(first, "Основной поток");
+        printSynchronized(second, "Основной поток");
+
+        Thread thread1 = new Thread(() -> {
+            printSynchronized(third, "Параллельный поток 1");
+            printSynchronized(fourth, "Параллельный поток 1");
+        });
+        thread1.start();
+
+        Thread thread2 = new Thread(() -> {
+            printSynchronized(fifth, "Параллельный поток 2");
+            printSynchronized(sixth, "Параллельный поток 2");
+        });
+        thread2.start();
+
+      try {
+          logger.info("Waiting for synchronized threads to finish");
+          thread1.join();
+          thread2.join();
+      } catch (InterruptedException e) {
+          logger.warn("The threads were interrupted", e);
+          Thread.currentThread().interrupt();
+      }
+
+    }
 }
+

@@ -25,7 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @AutoConfigureMockMvc
-@SpringBootTest
+@SpringBootTest(properties = {"server.port=8080"})
 class FacultyControllerMockMvcTest {
 
     @Autowired
@@ -39,6 +39,7 @@ class FacultyControllerMockMvcTest {
 
     @BeforeEach
     void setUp() {
+        // TODO Этот метод подготовит тестовую среду перед каждым тестом
     }
 
     private Faculty createFaculty(String name, String color) {
@@ -48,8 +49,9 @@ class FacultyControllerMockMvcTest {
         return expectedFaculty;
     }
 
-    private Student createStudent(String name, int age) {
+    private Student createStudent(long id, String name, int age) {
         Student expectedStudent = new Student();
+        expectedStudent.setId(id);
         expectedStudent.setName(name);
         expectedStudent.setAge(age);
         return expectedStudent;
@@ -192,8 +194,8 @@ class FacultyControllerMockMvcTest {
     @DisplayName("Находит всех студентов заданного факультета")
     void whenFindStudentsByFaculty_ThenStudentsByFacultyAreFound() throws Exception {
         Faculty expectedFaculty = createFaculty("nameFaculty", "color");
-        Student student1 = new Student(1, "Bill", 20);
-        Student student2 = new Student(2, "Bob", 15);
+        Student student1 = createStudent(1, "Bill", 20);
+        Student student2 = createStudent(2, "Bob", 15);
 
         expectedFaculty.setStudents(Arrays.asList(student1, student2));
 
